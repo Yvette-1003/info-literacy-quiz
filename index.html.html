@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>中小学生信息素养测评</title>
+<style>
+  :root{--primary:#4f7cff;--primary-dark:#3b5fd9;--primary-light:#eef2ff;
+        --text:#1f2937;--muted:#6b7280;--bg:#f3f6fb;--line:#e5e7eb}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);
+       color:var(--text);min-height:100vh;display:flex;justify-content:center;padding:20px 14px}
+  .wrap{width:100%;max-width:760px}
+  .hidden{display:none!important}
+  .card{background:#fff;border-radius:16px;box-shadow:0 6px 24px rgba(31,41,55,.07);padding:26px;margin-bottom:18px}
+  .hero{text-align:center}
+  .hero h1{font-size:26px;margin-bottom:8px}
+  .hero p{color:var(--muted);font-size:14px;line-height:1.8}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:14px 0 4px}
+  .chip{background:var(--primary-light);color:var(--primary-dark);font-size:13px;padding:5px 12px;border-radius:999px}
+  .sec-label{margin-top:18px;font-size:15px;font-weight:600}
+  .modes{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+  @media(max-width:560px){.modes{grid-template-columns:1fr}}
+  .mode-card{border:2px solid var(--line);border-radius:12px;padding:14px 10px;cursor:pointer;transition:.2s;text-align:center;background:#fff}
+  .mode-card:hover{border-color:#a8bfff}
+  .mode-card.selected{border-color:var(--primary);background:var(--primary-light)}
+  .mode-card h4{font-size:15px;margin-bottom:4px}
+  .mode-card p{font-size:12px;color:var(--muted);line-height:1.6}
+  .levels{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:10px}
+  @media(max-width:560px){.levels{grid-template-columns:1fr}}
+  .level-card{border:2px solid var(--line);border-radius:14px;padding:18px 12px;text-align:center;
+              cursor:pointer;transition:.2s;background:#fff}
+  .level-card:hover{border-color:var(--primary);transform:translateY(-3px);box-shadow:0 8px 18px rgba(79,124,255,.15)}
+  .level-card .icon{font-size:34px}
+  .level-card h3{margin:8px 0 4px;font-size:17px}
+  .level-card p{font-size:12px;color:var(--muted)}
+  .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;font-size:14px;color:var(--muted)}
+  .dim-tag{background:var(--primary-light);color:var(--primary-dark);padding:3px 10px;border-radius:999px;font-size:13px}
+  .progress{height:8px;background:var(--line);border-radius:99px;overflow:hidden;margin-bottom:20px}
+  .progress-inner{height:100%;background:linear-gradient(90deg,#4f7cff,#7aa0ff);border-radius:99px;transition:width .3s}
+  .qtext{font-size:18px;font-weight:600;line-height:1.7;margin-bottom:18px}
+  .opt{display:flex;gap:10px;align-items:flex-start;width:100%;text-align:left;border:2px solid var(--line);
+       background:#fff;border-radius:12px;padding:13px 15px;font-size:15px;line-height:1.6;cursor:pointer;
+       margin-bottom:10px;transition:.15s;color:var(--text);font-family:inherit}
+  .opt:hover{border-color:#a8bfff}
+  .opt.selected{border-color:var(--primary);background:var(--primary-light)}
+  .opt .letter{flex:none;width:26px;height:26px;border-radius:50%;background:#f1f5f9;color:var(--muted);
+       display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+  .opt.selected .letter{background:var(--primary);color:#fff}
+  .btn{border:none;border-radius:12px;background:var(--primary);color:#fff;font-size:15px;font-weight:600;
+       padding:12px 26px;cursor:pointer;transition:.2s;font-family:inherit}
+  .btn:hover{background:var(--primary-dark)}
+  .btn:disabled{opacity:.4;cursor:not-allowed}
+  .btn.ghost{background:#fff;color:var(--primary);border:2px solid var(--primary)}
+  .btn.ghost:hover{background:var(--primary-light)}
+  .qfooter{display:flex;justify-content:flex-end;margin-top:6px}
+  .score-hero{text-align:center}
+  .big-score{font-size:56px;font-weight:800;color:var(--primary);line-height:1}
+  .big-score span{font-size:20px;color:var(--muted);font-weight:500}
+  .badge{display:inline-block;margin-top:10px;padding:6px 18px;border-radius:999px;font-size:15px;font-weight:700;color:#fff}
+  .result-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:20px;align-items:center}
+  @media(max-width:560px){.result-grid{grid-template-columns:1fr}}
+  #radar{width:100%;max-width:340px;height:auto;display:block;margin:0 auto}
+  .dim-row{margin-bottom:12px}
+  .dim-row .name{display:flex;justify-content:space-between;font-size:14px;margin-bottom:5px}
+  .bar{height:8px;background:var(--line);border-radius:99px;overflow:hidden}
+  .bar-inner{height:100%;border-radius:99px;background:var(--primary)}
+  h2.sec{font-size:17px;margin:22px 0 12px;border-left:4px solid var(--primary);padding-left:10px}
+  .tip{background:#fffbeb;border:1px solid #fde68a;color:#92400e;border-radius:10px;padding:10px 14px;
+       font-size:14px;line-height:1.7;margin-bottom:10px}
+  .review-item{border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px;font-size:14px;line-height:1.8}
+  .review-item .q{font-weight:600;margin-bottom:6px}
+  .wrong{color:#ef4444}.right{color:#22c55e}
+  .exp{background:#f8fafc;border-radius:8px;padding:8px 12px;color:var(--muted);margin-top:6px}
+  .actions{display:flex;gap:12px;justify-content:center;margin-top:20px;flex-wrap:wrap}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- 开始页 -->
+  <div id="screen-start">
+    <div class="card hero">
+      <h1>🔍 中小学生信息素养测评</h1>
+      <p>本工具从五个维度测评你的信息素养，请独立作答，结果仅供参考。</p>
+      <div class="chips">
+        <span class="chip">信息意识</span><span class="chip">信息获取</span><span class="chip">信息评价</span>
+        <span class="chip">信息利用</span><span class="chip">信息道德</span>
+      </div>
+      <p class="sec-label">第一步：选择测评模式</p>
+      <div class="modes">
+        <div class="mode-card selected" id="mode-full" onclick="setMode('full')">
+          <h4>📋 完整测评</h4><p>40 题 · 约 15 分钟<br>题目完整固定，用于正式测评</p>
+        </div>
+        <div class="mode-card" id="mode-quick" onclick="setMode('quick')">
+          <h4>⚡ 快速测评</h4><p>随机 10 题 · 约 5 分钟<br>每次自动抽题，用于日常练习</p>
+        </div>
+      </div>
+      <p class="sec-label">第二步：选择你的学段</p>
+      <div class="levels">
+        <div class="level-card" onclick="startQuiz('xiaoxue')"><div class="icon">🐣</div><h3>小学组</h3><p>适合小学高年级</p></div>
+        <div class="level-card" onclick="startQuiz('chuzhong')"><div class="icon">🚀</div><h3>初中组</h3><p>适合初中各年级</p></div>
+        <div class="level-card" onclick="startQuiz('gaozhong')"><div class="icon">🎓</div><h3>高中组</h3><p>适合高中各年级</p></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="sec" style="margin-top:0">📊 数据管理（教师用）</h2>
+      <p style="font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:12px">每份完成的测评会自动匿名保存在<b>本设备</b>的浏览器中（不含姓名）。当前已保存 <b id="rec-count">0</b> 份记录。</p>
+      <div class="actions" style="justify-content:flex-start;margin-top:0">
+        <button class="btn" onclick="exportAllScore()">导出成绩汇总</button>
+        <button class="btn" onclick="exportAllDetail()">导出作答明细</button>
+        <button class="btn ghost" onclick="exportBank()">导出题库对照表</button>
+        <button class="btn ghost" onclick="clearRecords()">清空本机记录</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 答题页 -->
+  <div id="screen-quiz" class="hidden">
+    <div class="card">
+      <div class="topbar"><span id="q-progress"></span><span class="dim-tag" id="q-dim"></span></div>
+      <div class="progress"><div class="progress-inner" id="q-bar"></div></div>
+      <div class="qtext" id="q-text"></div>
+      <div id="q-options"></div>
+      <div class="qfooter"><button class="btn" id="btn-next" disabled onclick="nextQ()">下一题</button></div>
+    </div>
+  </div>
+
+  <!-- 结果页 -->
+  <div id="screen-result" class="hidden">
+    <div class="card">
+      <div class="score-hero">
+        <div class="big-score"><span id="r-total">0</span><span> / 100 分</span></div>
+        <div><span class="badge" id="r-badge"></span></div>
+        <p style="color:var(--muted);font-size:13px;margin-top:8px" id="r-level-name"></p>
+        <p style="font-size:12px;color:var(--muted);margin-top:6px">记录编号：<b id="r-recid">-</b> · 本卷用时 <span id="r-duration">-</span> · 匿名保存在本机</p>
+      </div>
+      <div class="result-grid">
+        <canvas id="radar"></canvas>
+        <div id="r-dims"></div>
+      </div>
+      <h2 class="sec">📌 提升建议</h2>
+      <div id="r-tips"></div>
+      <h2 class="sec">📝 错题回顾</h2>
+      <div id="r-review"></div>
+      <div class="actions">
+        <button class="btn ghost" onclick="exportLast()">导出本次数据(CSV)</button>
+        <button class="btn" onclick="retry()">再测一次</button>
+        <button class="btn ghost" onclick="backHome()">换个学段</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- 自检：如果脚本失效，页面底部会弹出提示 -->
+<script>
+window.addEventListener('load', function(){
+  setTimeout(function(){
+    if (typeof startQuiz !== 'function'){
+      document.body.insertAdjacentHTML('beforeend',
+        '<div style="position:fixed;bottom:10px;left:10px;right:10px;background:#ef4444;color:#fff;padding:10px 14px;border-radius:8px;font-size:13px;">脚本加载失败：请确认完整复制了全部代码（从第一行到最后一行），并重新保存。</div>');
+    }
+  }, 500);
+});
+</script>
+
+<script>
+/* ========== 1. 维度与题库（在此增删改题） ========== */
+var DIMS = ['信息意识','信息获取','信息评价','信息利用','信息道德'];
+var TIPS = {
+  '信息意识':'多留意生活和网络中的信息问题，遇到不确定的消息先问自己：这是谁说的？有什么证据？',
+  '信息获取':'学习图书馆检索和搜索技巧（关键词、双引号、时间筛选等），优先使用官方与权威渠道。',
+  '信息评价':'看到消息先核实：查作者、查时间、查证据，多个独立来源交叉验证，不轻信夸张标题。',
+  '信息利用':'练习用自己的话总结资料，学会用笔记、思维导图等工具分类整理，引用他人观点注明出处。',
+  '信息道德':'了解著作权与隐私保护知识：不抄袭、不乱转发、不泄露隐私，规范使用AI等新工具。'
+};
+var BANK = {
+  xiaoxue:{name:'小学组',questions:[
+    {dim:'信息意识',q:'小明要写一篇介绍「大熊猫」的作文，他首先应该做什么？',opts:['先想清楚需要了解大熊猫的哪些信息','直接凭印象开始写','随便抄一篇网上的作文','等老师给出答案'],ans:0,exp:'信息意识的第一步是明确信息需求：先想清楚要解决什么问题、需要哪些信息，再去查找。'},
+    {dim:'信息意识',q:'刷短视频时看到「今晚将出现超级月亮」的消息，你想先确认它是不是真的。这样做说明你？',opts:['太较真了，没必要','有想弄清楚真相的好习惯','应当马上转发给大家','只是无聊随便看看'],ans:1,exp:'对信息保持敏感、愿意主动求证，正是信息意识的表现。'},
+    {dim:'信息意识',q:'班里流传「下周要换新教室」的说法，很多同学都当真了。比较恰当的做法是？',opts:['大家都信，那我也信','再传给别的班同学','先向老师求证，再决定信不信','完全不理，听什么都无所谓'],ans:2,exp:'面对未经证实的消息，先向老师等可靠信源求证，既不轻信也不乱传。'},
+    {dim:'信息意识',q:'妈妈想给爷爷买一台收音机当生日礼物，你提醒她先看看大家的使用评价。你的做法？',opts:['爱管闲事','不相信妈妈','太啰嗦了','懂得先收集信息再做决定'],ans:3,exp:'做决定之前主动收集相关信息，让选择更有依据，正是信息意识的日常体现。'},
+    {dim:'信息意识',q:'下面哪位同学最会自己想办法了解想知道的事情？',opts:['小林想知道明天有没有美术课，就一直等着同桌告诉他','小明收到活动通知，看也不看就塞进了书包','小华想看新到的故事书，主动去学校图书馆的新书推荐架看了看','小红想参加航模比赛，觉得「肯定查不到」，干脆不查'],ans:2,exp:'想知道一件事，就主动去看、去问、去查，才能及时得到需要的信息；干等别人告诉，常常会错过重要消息。'},
+    {dim:'信息意识',q:'你发现奶奶常常相信手机里的「养生谣言」还乱买保健品。你会怎么做？',opts:['帮奶奶查查靠谱的说法，教她别上当','无所谓，奶奶开心就好','批评奶奶太糊涂','偷偷把奶奶的手机藏起来'],ans:0,exp:'用可靠信息帮助家人辨别谣言，既保护了家人，也是信息素养的善意应用。'},
+    {dim:'信息意识',q:'学校运动会马上开始，下面哪条信息对你现在最有用？',opts:['去年运动会的成绩','别的学校运动会的新闻','十年前运动会的老照片','今天的比赛时间安排和场地安排'],ans:3,exp:'信息有「时效性」和「相关性」：越及时、越和自己需要的事情相关的信息，价值越高。'},
+    {dim:'信息意识',q:'看科普纪录片时，小舟发现一个有趣的知识点，马上记在笔记本上。这个习惯的好处是？',opts:['没有什么好处','把有用的信息记下来，以后好找','装样子给别人看','浪费时间'],ans:1,exp:'随手记录有价值的信息，方便以后查找和使用，是积累和管理信息的好习惯。'},
+    {dim:'信息获取',q:'想知道明天会不会下雨，最快捷可靠的方式是？',opts:['问楼下的小朋友','查看天气预报APP或电视天气预报','抬头看看今天的天气猜一猜','翻一翻去年的日历'],ans:1,exp:'获取天气信息，官方和专业渠道（气象部门、天气APP）最快捷可靠。'},
+    {dim:'信息获取',q:'想在图书馆找《夏洛的网》这本书，下面哪种方法又快又准？',opts:['一个书架一个书架慢慢翻','随便问问身边的同学','在图书馆查书用的电脑上输入书名，按屏幕提示到相应的书架去找','找不到就算了'],ans:2,exp:'图书馆里查书用的电脑就像「图书导航」：输入书名，它就会告诉你要找的书在哪个书架上。'},
+    {dim:'信息获取',q:'想在网上查「长城的历史」，下面哪种搜索方式最有效？',opts:['只输入「历史」两个字','输入一整句话，比如「请问长城的历史是什么」','输入「好吃的」','输入「长城 历史」这样的关键词'],ans:3,exp:'搜索时输入最主要的词语更有效：把「长城」和「历史」一起输入，比输入一整句话更容易找到想要的结果。'},
+    {dim:'信息获取',q:'想知道蚂蚁为什么排队搬食物，除了问老师，你还可以？',opts:['查一查《昆虫百科》这样的科普书','只能等老师上课讲','问问邻居家的小猫','算了，不想知道了'],ans:0,exp:'同一个问题可以通过多种正规渠道获取答案：图书、权威网站都是好帮手。'},
+    {dim:'信息获取',q:'打开一个很长的网页，想尽快找到「大熊猫吃什么」的答案，下面哪种办法最好？',opts:['从头到尾一个字一个字慢慢读','用网页的「查找」功能输入关键词','马上关掉网页','随便扫一眼就说找完了'],ans:1,exp:'读长资料有窍门：用「查找」功能输入关键词，或者先看看每一部分讲的是什么，都能很快找到答案。'},
+    {dim:'信息获取',q:'下面哪一组都是获取信息的正规渠道？',opts:['小道消息和八卦','来路不明的「神秘文件」','电视新闻、报纸、图书馆的图书','同学之间传来传去的传言'],ans:2,exp:'新闻媒体、出版图书、官方网站等都是正规信息渠道，消息更可靠。'},
+    {dim:'信息获取',q:'小雨在《十万个为什么》里查过「彩虹的成因」，以后想再细看。下面哪个习惯能帮她快速找回这本书？',opts:['随手乱丢','从不做任何记录','把书藏起来不让别人看','记下书名和页码，看完放回原处'],ans:3,exp:'记录信息的来源（书名、页码），既方便以后再次查找，也是规范使用信息的好习惯。'},
+    {dim:'信息获取',q:'为了弄清楚「种子发芽需要什么条件」，下面哪种做法获取的信息最全面可靠？',opts:['查科普书、问老师，再自己动手试一试','自己猜一猜就行','只问一个同学','只看动画片猜'],ans:0,exp:'多渠道收集信息并互相验证，得到的结论更全面、更可靠。'},
+    {dim:'信息评价',q:'网页上说「吃糖能让人变聪明」，你应该？',opts:['先查一查有没有科学依据','马上买很多糖来试','立刻转发给同学','标题很吸引人，应该是对的'],ans:0,exp:'对夸张的说法要保持怀疑：先查证有没有科学依据，而不是马上行动或转发。'},
+    {dim:'信息评价',q:'下面哪一个来源的「太空知识」最可信？',opts:['陌生网友的帖子','街边小广告','国家航天局官网','不知名的小视频'],ans:2,exp:'权威机构发布的信息经过专业审核，可信度高于匿名帖子或广告。'},
+    {dim:'信息评价',q:'关于「恐龙灭绝的原因」，你在两本书里看到了不同的说法。你应该？',opts:['相信更厚的那一本','多查几本资料，比较不同的说法','随便挑一个相信','谁的声音大就信谁'],ans:1,exp:'不同资料说法不一致时，要查更多权威资料、比较分析；科学研究中有不同观点很正常。'},
+    {dim:'信息评价',q:'下面哪种说法最需要打一个大大的问号？',opts:['课本上的科学知识','电视新闻里的报道','广告里说的「吃了这种糖，考试轻松考100分」','百科全书里的内容'],ans:2,exp:'广告的目的是推销商品，常常夸大效果。看到夸张宣传要多留个心眼，别轻易相信。'},
+    {dim:'信息评价',q:'一个视频里讲的「知识」有几十万人点赞，这说明？',opts:['说明它讲的一定是对的','说明内容一定是假的','说明以后都不能看视频了','只说明看的人多，对不对还要看根据'],ans:3,exp:'点赞量、转发量代表关注度，不代表正确性；判断内容要看证据和来源。'},
+    {dim:'信息评价',q:'想知道「今天的天气」，你应该参考哪条信息？',opts:['今天最新的天气预报','去年同一天的天气','十年前的天气预报','同学的小道消息'],ans:0,exp:'信息有时效性：过时的信息可能已经不再准确，查询时要注意信息发布的时间。'},
+    {dim:'信息评价',q:'看到《震惊！9亿人都不知道的秘密，不看后悔一辈子》这样的标题，正确的态度是？',opts:['标题越吓人越要点开看','可能是标题党，先看看内容靠不靠谱','不看内容就马上转发','标题写得对，全部当真'],ans:1,exp:'夸张吓人的标题常是「标题党」的手段；遇到时保持冷静，看内容是否有真凭实据。'},
+    {dim:'信息评价',q:'小明看到一张「天上出现两个太阳」的照片很吃惊。比较合理的做法是？',opts:['马上告诉所有人天要变了','直接相信照片是真的','吓得不敢出门','先想想是不是改过的，再查查新闻'],ans:3,exp:'照片、视频也可能被修改或用AI生成；眼见不一定为实，要查证权威消息。'},
+    {dim:'信息利用',q:'做手抄报时你收集了很多资料，下一步应该？',opts:['把资料全部原样抄上去','先放着不管','让别人替你做','挑有用的，用自己的话写'],ans:3,exp:'信息利用的关键是筛选和加工：挑出有用信息，用自己的话重新组织，而不是照搬。'},
+    {dim:'信息利用',q:'把自己查到的资料用自己的话写出来并整理好，这个过程叫？',opts:['信息抄袭','信息的加工与整理','信息删除','信息转发'],ans:1,exp:'对收集到的信息进行筛选、总结、重组，叫信息的加工与整理，是信息利用的核心。'},
+    {dim:'信息利用',q:'小组调查了「同学们最喜欢的运动」，要展示结果，用哪种方式最清楚？',opts:['用表格或统计图，让人一看就明白','把所有数字写成一长段话','全靠脑子背下来','不整理直接交给老师'],ans:0,exp:'表格和统计图能让数据信息变得直观清楚，是整理和呈现信息的常用好工具。'},
+    {dim:'信息利用',q:'摘抄课文里的好词好句时，好的习惯是？',opts:['只抄内容不记出处','随手把那一页撕下来','连书名、作者一起记下来','抄完就丢到一边'],ans:2,exp:'记录出处既方便日后查找原文，也是尊重原作者、规范使用信息的表现。'},
+    {dim:'信息利用',q:'写「家乡的桥」作文时你收集了20条资料，正确的做法是？',opts:['全部塞进作文里','挑和题目最相关的，用自己的话写','随机挑10条放进去','不管相不相关，越多越好'],ans:1,exp:'利用信息要学会「筛选」：与主题相关的才用，并经过自己的理解加工，而不是堆砌。'},
+    {dim:'信息利用',q:'要向全班汇报小组的读书成果，上台前你应该？',opts:['什么都不准备，上去随便说','把整本书都背下来','让别人替自己讲','整理成提纲，按顺序讲'],ans:3,exp:'把信息整理成提纲、理清先后顺序，表达才能有条理，这是信息利用的重要能力。'},
+    {dim:'信息利用',q:'小强把网上的资料原样抄进作业，其实他自己也没看懂。他的主要问题是？',opts:['抄得太少了','完全没有问题','没有先看懂，就直接照搬','字写得不够好看'],ans:2,exp:'「信息利用」不是照搬。先弄懂，再用自己的话表达，信息才真正变成了自己的知识。'},
+    {dim:'信息利用',q:'小组把校园里拍到的植物照片和名称、特点对应整理成「植物小档案」。这属于信息利用中的？',opts:['信息的分类与组织','信息删除','信息破坏','信息遗忘'],ans:0,exp:'把零散的信息按类别整理、建立对应关系，就是信息的分类与组织。'},
+    {dim:'信息道德',q:'在网上找到一张喜欢的卡通图想放进PPT，正确做法是？',opts:['注明图片是谁画的，或选写着「可以免费用」的图','随便用，不用管来源','把图片改成自己的名字','把作者名字抹掉'],ans:0,exp:'尊重创作者：使用他人作品要注明来源，或选择明确授权免费使用的素材。'},
+    {dim:'信息道德',q:'网上有个陌生人问你家的住址和爸爸妈妈的电话，你应该？',opts:['如实告诉他','不告诉对方，并告诉家长或老师','告诉他一个假地址','反过来骗他的信息'],ans:1,exp:'住址、电话属于个人隐私，绝不能告诉陌生人；拿不准时第一时间告诉家长或老师。'},
+    {dim:'信息道德',q:'在网上和同学讨论问题时，下面哪种发言是文明且有素养的？',opts:['骂不同意自己的人','对别人进行人身攻击','有道理，也有礼貌','用表情包刷屏堵住别人'],ans:2,exp:'网络发言要文明：对事不对人、有理有据、尊重他人，这是网络礼仪的基本要求。'},
+    {dim:'信息道德',q:'看到一条没写来源、说「明天学校停课」的消息，你应该？',opts:['立刻转发到各个群','加上「我也听说了」再转发','直接当真并去请假','先问问老师，学校是不是真发了通知'],ans:3,exp:'没有来源的消息很可能是谣言；不造谣、不传谣，先核实再行动。'},
+    {dim:'信息道德',q:'同学生病住院你去探望，想把照片分享到网上。合适的做法是？',opts:['先问问同学和家长同不同意','不经过同意就直接发','把同学的姓名班级全部公开','顺便写点同学的糗事'],ans:0,exp:'涉及他人的照片和信息，发布前要征得同意。尊重和保护他人隐私是网络道德的重要部分。'},
+    {dim:'信息道德',q:'关于账号和密码，下面哪种做法是对的？',opts:['告诉好朋友，友谊第一','设置成123456，简单好记','不告诉别人，密码设复杂一些','写在教室的公告栏上'],ans:2,exp:'密码是保护个人信息的钥匙：不能透露给别人，也不要用太简单的密码。'},
+    {dim:'信息道德',q:'把网上找到的作文改成自己的名字交给老师，这种做法？',opts:['聪明省事的好办法','是抄袭，不诚信也侵犯别人权益','没被发现就没有关系','大家都这样，没关系'],ans:1,exp:'冒用他人作品既不诚信，也侵犯著作权；可以参考学习，但不能据为己有。'},
+    {dim:'信息道德',q:'玩网络游戏时，有人建议你安装「外挂」作弊软件。你应该？',opts:['马上装上，赢过大家','装了再推荐给朋友','装了还谎称是官方出品','不装，也不推荐给别人'],ans:3,exp:'使用外挂破坏公平，还可能携带病毒、泄露信息；诚信游戏才玩得安心。'}
+  ]},
+  chuzhong:{name:'初中组',questions:[
+    {dim:'信息意识',q:'老师布置了「家乡水质调查」的研究任务，第一步应该？',opts:['直接去河边拍照取证','先明确调查目的和需要收集的信息','网上抄一篇现成的报告','先问问家长能不能不做'],ans:1,exp:'明确信息需求是研究的第一步：先想清楚调查什么、需要什么数据，行动才有方向。'},
+    {dim:'信息意识',q:'班级群里有人转发「转发这条消息就能免费领会员」，你应该？',opts:['马上转发，怕错过','叫大家一起转发','先判断真伪，不盲目转发','装作没看见'],ans:2,exp:'天上不会掉馅饼。转发前先核实真伪，不确定的消息不传播，既是自我保护也是对他人负责。'},
+    {dim:'信息意识',q:'学校组织去博物馆研学，小航提前查了开放时间、乘车路线和展览介绍，还做了参观计划。对他的做法，评价最恰当的是？',opts:['做事前主动收集需要的信息，值得肯定','浪费时间，不如到了再说','太谨慎了，跟着大家走就行','只是为了在同学面前炫耀'],ans:0,exp:'信息意识强的人会在行动前主动收集需要的信息，让活动更顺利。'},
+    {dim:'信息意识',q:'小薇英语成绩不理想，她注意到班里几位同学用「词根联想」的方法背单词效果不错。最能体现信息意识的做法是？',opts:['觉得别人学得好是天赋，和自己无关','马上原样照搬，效果不好就怪方法','干脆放弃英语不学了','先了解这个方法怎么做、适不适合自己'],ans:3,exp:'信息意识也表现为：留意有效做法，主动收集和评估信息，为自己的学习做决定。'},
+    {dim:'信息意识',q:'下面哪位同学的表现说明他比较缺少信息意识？',opts:['开学第一周就把本学期的活动安排记在日历上','每天看新闻了解时事','做实验前先查了安全注意事项','报名截止当天才想起查通知，错过了报名'],ans:3,exp:'缺少信息意识的人往往不及时关注相关信息，等想起来时已经错过。'},
+    {dim:'信息意识',q:'老师让全班收集「节约用水」的金点子。小磊把家里、学校、网上看到的好做法都记在专门的本子上。这个习惯说明他？',opts:['善于留意和积累身边有价值的信息','不务正业，想得太多','只是应付老师的任务','有点强迫症'],ans:0,exp:'随手积累有价值的信息，需要时就能拿出来用；善于发现和记录是信息意识强的表现。'},
+    {dim:'信息意识',q:'手机突然弹出推送：「某地发生7.8级地震」。比较有信息意识的第一反应是？',opts:['立刻转发到所有群，让大家快跑','先看看发布时间和消息来源','吓得整晚睡不着','坚决不相信任何消息'],ans:1,exp:'对突发重大消息，第一反应是核实：何时发布？谁发布？是否权威渠道？这能避免被过期或虚假消息误导。'},
+    {dim:'信息意识',q:'关于信息的价值，下面说法最准确的是？',opts:['信息对所有人的价值都一样','信息越多越好，不用筛选','信息的价值随人和时间而变化','只有网上的信息才有价值'],ans:2,exp:'信息的价值因人、因时而异：同一条消息，对相关的人很重要，对无关的人可能毫无用处。'},
+    {dim:'信息获取',q:'想精确搜索包含完整短语「碳中和政策」的网页，最有效的技巧是？',opts:['把整句话都输入搜索框','只搜「政策」两个字','给关键词加上英文双引号','在多个平台随便乱搜'],ans:2,exp:'双引号可以限定完整短语匹配，是搜索引擎最常用的精确检索技巧之一。'},
+    {dim:'信息获取',q:'想查找近五年的学术论文，比较合适的渠道是？',opts:['短视频平台','知网、万方等学术数据库','游戏论坛','朋友圈'],ans:1,exp:'学术数据库收录正规期刊论文，是学术检索的主要渠道。'},
+    {dim:'信息获取',q:'想查「唐代诗人的代表作」，直接把整句话输入搜索框，结果五花八门。下面哪种搜索方式更容易找到有用的结果？',opts:['输入核心关键词的组合，如「唐代 诗人 代表作」','输入「请你告诉我唐代诗人的代表作有哪些，谢谢」','输入「好吃的红烧肉」','什么都不输入'],ans:0,exp:'搜索时抓核心词、去掉客套话，再用空格组合关键词，能明显提高结果的准确度。'},
+    {dim:'信息获取',q:'想同时搜到既包含「曹操」又包含「赤壁」两个词的网页，在搜索框里怎么输入最合适？',opts:['输入「曹操 -赤壁」，减号表示不要赤壁','只输入「曹操」','只输入「赤壁」','输入「曹操 赤壁」，用空格把两个关键词隔开'],ans:3,exp:'用空格隔开多个关键词，结果就会同时包含这些词；减号的作用恰恰相反，表示排除某个词。'},
+    {dim:'信息获取',q:'搜「近视防控」出来几十万条结果，还有不少广告。下面哪种做法能更快找到靠谱的内容？',opts:['从第一条开始一条一条慢慢点','加上限定词，并优先看官方网站的结果','只看带「广告」标记的结果','等过几天再搜'],ans:1,exp:'结果太多时，加限定词缩小范围；结果太杂时，优先选择官方网站、权威机构的结果。'},
+    {dim:'信息获取',q:'搜「垃圾分类」只找到几条不相关的结果。下面哪种调整方式最有帮助？',opts:['放弃这次搜索','只搜一个「垃」字','换个意思相近的词再搜','连续点击搜索按钮'],ans:2,exp:'搜不到结果或结果不对路时，换同义词、近义词是常用的补救办法。'},
+    {dim:'信息获取',q:'想了解本市今年中考政策有没有变化，下面哪个渠道的信息最权威？',opts:['某辅导机构的宣传单','家长微信群里流传的截图','短视频博主的个人解读','市教育局的官方网站和官方公众号'],ans:3,exp:'政策类信息要以政府部门的官方发布为准。培训机构、群聊截图、博主解读都可能有偏差，甚至故意夸大。'},
+    {dim:'信息获取',q:'小舟要写一篇关于家乡老街的作文，需要第一手资料。下面哪项属于第一手资料？',opts:['自己实地走访老街、拍摄照片并采访老街坊','同学转述的老街故事','网上到处转载的老街介绍','很多年前一篇没有署名的旧文章'],ans:0,exp:'第一手资料是自己亲身调查、观察、采访得到的原始材料；经过别人转述或转载的，都可能被删改。'},
+    {dim:'信息评价',q:'判断一篇文章是否可信，主要考察？',opts:['标题够不够惊人','作者、出处、时间和证据是否充分','评论数量多不多','排版好不好看'],ans:1,exp:'评价信息可信度要看：作者是谁、有无出处、何时发布、论据是否充分。'},
+    {dim:'信息评价',q:'某自媒体称「某食品致癌」但没有给出任何研究来源，你应该？',opts:['马上不再吃这种食品','转发提醒所有亲友','向权威机构查证','完全无所谓'],ans:2,exp:'没有来源的说法先存疑，向权威机构或多个可靠信源核实后再决定是否相信。'},
+    {dim:'信息评价',q:'一篇科普文章说「实验证明，喝某饮料能提高记忆力」，但整个实验只让2个人试了试。对这篇文章，正确的态度是？',opts:['只试了2个人，太少，说明不了问题','人数虽少，结论也一定可靠','是实验的结论就都可信','先喝了饮料再说话'],ans:0,exp:'只用两三个人得出的「实验结论」偶然性太大；判断研究可不可信，要看实验对象够不够多、过程是否规范。'},
+    {dim:'信息评价',q:'一张图表显示「某市中学生近视率达80%」，显得很惊人。判断这组数据是否可信，下面哪个做法最合理？',opts:['图表做得专业，直接相信','数据越吓人越真实','自己戴眼镜了才算数','查数据来源、统计范围和时间'],ans:3,exp:'看数据先问三个问题：谁统计的？统计了哪些人？什么时候统计的？来源规范、范围清楚的数据才值得采信。'},
+    {dim:'信息评价',q:'家族群里流传「本市自来水将停供三天」，还配了一张水厂通知的照片。下面哪种核实方法最有效？',opts:['用通知里的关键文字搜索，看是不是旧闻重传','看照片模糊不模糊','数一数有多少人转发','觉得无所谓，停就停吧'],ans:0,exp:'旧通知被移花接木、配上新时间重新传播，是谣言的常见套路；用关键文字搜索，往往几秒钟就能查到真相。'},
+    {dim:'信息评价',q:'视频里一位「专家」声称「中学生不需要睡满8小时」，但没有介绍他的真实身份，也没给出研究依据。你应该？',opts:['头衔带「专家」两个字的都对','先查证他的身份和依据，再决定信不信','网上视频全是假的，都不用看','立刻按他说的做'],ans:1,exp:'「专家」头衔可以随便写。评价观点前，先查他的真实身份和专业背景，再看说法有没有依据。'},
+    {dim:'信息评价',q:'一篇文章的标题是《医生强烈推荐！这种保健品让孩子成绩翻倍》，读到结尾发现其实是某公司的产品推广。这类文章属于？',opts:['权威医学文献','政府公告','软文：伪装成科普的广告','科学论文'],ans:2,exp:'打着「医生推荐」「科学证明」旗号的广告软文很常见；看到文章极力推荐产品时，要警惕背后的商业目的。'},
+    {dim:'信息评价',q:'关于「二手信息」（经过转述、转载的信息），下面理解正确的是？',opts:['二手信息全都是假的','好不好玩最重要，真假无所谓','手抄的内容都算二手信息','信息会被改动，重要的要追到原始来源'],ans:3,exp:'转述和转载的过程中，信息可能被删减、夸大甚至扭曲；越重要的信息，越要找到它最初的来源。'},
+    {dim:'信息利用',q:'你收集了多份关于垃圾分类的资料，正确的做法是？',opts:['全文照搬进报告','分类整理、比较不同观点、提炼自己的结论','只看第一篇就够了','全都不看了'],ans:1,exp:'信息利用要做消化吸收：分类整理、比较分析、形成自己的结论，而不是简单堆砌。'},
+    {dim:'信息利用',q:'在研究报告中引用别人的观点，规范的做法是？',opts:['不标注也没关系','改成自己的名字','文末写一句「来源于网络」','完整标注作者、标题、来源和时间'],ans:3,exp:'规范引用要写清楚作者、标题、来源和时间，这既是学术规范也是对他人的尊重。'},
+    {dim:'信息利用',q:'小组调查了「中学生睡眠时间」，手里有平均时长、各年级对比等数据。要向全班展示，下面哪种方式最合适？',opts:['用统计图表呈现关键数据，再配简短说明','把原始问卷一张一张念出来','让大家自己想象','只说结论，不给任何数据'],ans:0,exp:'图表能把大量数据变得直观，再配上简短说明，别人很快就能看懂；念原始问卷既费时又抓不住重点。'},
+    {dim:'信息利用',q:'制作PPT汇报「家乡的非遗文化」，下面哪种做法最能体现对信息的高质量利用？',opts:['把网页文字整段复制粘贴上去','用大段文字把每页堆满','提炼要点、配上图片、注明来源','每页只放音乐不放内容'],ans:2,exp:'高质量的信息利用是「消化后的再表达」：提炼、组织、转化为自己的表达，同时注明来源。'},
+    {dim:'信息利用',q:'写研究性学习报告时，你查到两份资料结论矛盾：一份说主要原因是A，另一份说主要原因是B。下面处理方式最恰当的是？',opts:['只采用自己喜欢的那份，删掉另一份','两份都抄上，不做任何分析','比较两份资料的依据，分析后再下结论','干脆不写了'],ans:2,exp:'资料出现矛盾很常见，这正是需要你分析和判断的地方：比较各自的证据和立场，形成有依据的结论。'},
+    {dim:'信息利用',q:'做读书笔记时，下面哪种方法更有利于以后的复习和使用？',opts:['把整章整章一字不落地抄下来','概括要点、标注页码、记下疑问','只在页边画好看的花边','一个字都不记，全靠脑子'],ans:1,exp:'好的读书笔记是加工过的信息：概括、标注来源、记录思考，复习时一目了然。'},
+    {dim:'信息利用',q:'下面哪种情况属于引用资料时的「断章取义」？',opts:['只截取对自己有利的半句话，歪曲原意','完整引用原文并注明出处','转述大意并说明来源','不引用任何资料'],ans:0,exp:'断章取义是只取片段、歪曲原意的引用方式，即使字面上「有出处」，也是对信息的不当利用。'},
+    {dim:'信息利用',q:'小组要为全校做「防溺水」宣传，收集了大量材料。下面哪种成果的信息利用效果最好？',opts:['把50页文字资料直接发给学生看','把所有材料原样贴满公告栏','交一张空白海报','做一张包含关键数据、危险情境和自救步骤的海报'],ans:3,exp:'信息利用的效果不在于数量，而在于能否把最重要的信息以最容易接受的方式传达给目标人群。'},
+    {dim:'信息道德',q:'把网上付费的课程视频录屏后免费分享给同学，这种做法？',opts:['侵犯知识产权，是不合适的','分享有理，助人为乐','反正没人知道，无所谓','付费内容就应该人人共享'],ans:0,exp:'付费课程受版权保护，未经授权传播属于侵权行为，也可能带来法律风险。'},
+    {dim:'信息道德',q:'注册一个学习类APP时，你应该？',opts:['所有信息都如实填写','仔细阅读隐私条款，少提供非必要信息','用别人的身份注册','把家庭信息全部告诉客服'],ans:1,exp:'保护个人信息：只提供必要信息，了解APP会如何使用你的数据。'},
+    {dim:'信息道德',q:'用AI工具写完作文，直接署上自己的名字交给老师。下面评价正确的是？',opts:['只要老师没发现就行','AI写得比人好，直接交没问题','把AI写的冒充自己的原创，属于不诚信','学校都不许提AI'],ans:2,exp:'AI适合用来启发思路，但把AI产出冒充为自己的原创属于学术不诚信；使用要遵守学校规定。'},
+    {dim:'信息道德',q:'班里同学在群聊里被多人起哄、P图恶搞，他情绪很低落。下面做法正确的是？',opts:['跟着起哄，反正大家都在发','悄悄把被恶搞的同学拉黑','当作热闹，围观就好','不参与、不转发，保存证据并告诉老师'],ans:3,exp:'起哄与传播会放大伤害；不参与、留证据、及时求助，是对被欺凌者最好的支持。'},
+    {dim:'信息道德',q:'有网友出高价收购你的游戏账号，还要求提供注册用的身份信息。你应该？',opts:['马上卖给他，赚一笔','先和他讨价还价','给他一半信息试试诚意','拒绝交易，并告诉家长'],ans:3,exp:'收购账号的背后常有灰色产业链，身份信息可能被冒用；遇到这类「好事」，先想想对方图什么。'},
+    {dim:'信息道德',q:'下载学习软件时，下面哪种做法更安全、更规范？',opts:['从官方网站或正规应用商店下载','哪里有盗版就去哪里下','随便扫别人发来的二维码安装','优先点弹窗里写着「高速下载」的按钮'],ans:0,exp:'来路不明的软件可能捆绑病毒，盗版也侵犯开发者权益；正规渠道更安全。'},
+    {dim:'信息道德',q:'收到短信：「您的账号涉嫌违规，请立即把验证码发给在线客服核实」。你应该？',opts:['马上发过去，配合调查','绝不透露，并向家长、老师或官方平台核实','先发一半验证码试试','回短信谩骂对方'],ans:1,exp:'验证码相当于账户的「最后一把钥匙」，正规机构不会索要；凡索要验证码的，基本可判定为诈骗。'},
+    {dim:'信息道德',q:'想把别人拍摄的视频转发到自己的账号，下面哪种做法符合规范？',opts:['抹掉原作者的水印，标成自己拍的','等原作者发现了再说','征得作者同意，或按要求注明来源','配上自己的解说，内容就全是自己的了'],ans:2,exp:'转发他人作品，要么先获得授权，要么按规定如实标注来源；抹水印、冒充原创都侵犯著作权。'}
+  ]},
+  gaozhong:{name:'高中组',questions:[
+    {dim:'信息意识',q:'看到「AI换脸诈骗」的新闻，具备信息素养的做法是？',opts:['觉得离自己很遥远，不用特意关注','当作娱乐八卦，看完就划走','主动学习辨别方法，并向家人科普','到各个群里转发，提醒大家当心'],ans:2,exp:'信息意识强表现为：关注信息安全事件，主动学习辨别方法并帮助身边人提高警惕；未核实的转发可能扩散恐慌。'},
+    {dim:'信息意识',q:'研究性学习选题时，下面哪个信息需求描述最清晰？',opts:['帮我查点跟学习有关的资料','感觉什么都可以查一查','短视频对高中生注意力的影响','范围宽一些，方便自由发挥'],ans:2,exp:'好的信息需求应当具体、可研究：明确对象、变量与范围，才能指导后续的检索与分析。'},
+    {dim:'信息意识',q:'高三学生小李准备综合评价招生面试：他把各校报名截止日期标进日历，订阅了省考试院公众号，还整理了一份往年面试问题清单。这些做法主要体现的是？',opts:['做事有条理，记忆力不错','主动规划信息获取的渠道与时机','略显繁琐，跟着学校安排即可','反映出他对升学有些焦虑'],ans:1,exp:'信息意识强的人会主动规划「要什么信息、从哪获取、何时获取」，并对关键节点做管理。'},
+    {dim:'信息意识',q:'小张发现三年前发在社交平台的动态仍能被搜到。下列认识最准确的是？',opts:['旧内容早就沉底，不会再被人看到','只有公众人物才需要在意网络形象','只要注销账号，记录就会彻底消失','网上发过的内容可能长期留存'],ans:3,exp:'网络内容具有留存性与可检索性；过去的言行可能长期可被查到，这要求我们对线上发布保持审慎。'},
+    {dim:'信息意识',q:'阅读某产品的深度测评时，小周的第一反应是「测评方是否接受过厂商赞助」。这一反应体现了？',opts:['对信息背后利益关系的敏感','对商业推广的天然排斥','多疑心理，不利于网络协作','对测评行业的彻底失望'],ans:0,exp:'关注「谁在说话、是否有利益关联」是评价信息的重要前置步骤，属于信息敏感度的核心表现。'},
+    {dim:'信息意识',q:'学校公布「学生手机使用时长调查」结果前，小王先检查了样本数量和有无明显乱填的作答。这体现的是？',opts:['较强的数据质量意识','熟练的软件操作能力','美化调查结果的需要','小题大做的较真性格'],ans:0,exp:'在使用数据前先检查样本与作答质量，是数据素养的基本功；结论的可靠性取决于数据的质量。'},
+    {dim:'信息意识',q:'使用生成式AI辅助学习时，信息素养高的学生最应具备的意识是？',opts:['AI足够成熟，回答可以直接采用','AI只适合娱乐，学习中应完全禁用','AI内容的准确性由平台负全责','AI输出可能有错，需自行核实'],ans:3,exp:'大模型可能生成看似通顺却与事实不符的内容（业内称「AI幻觉」），因此AI输出必须经过人工核实。'},
+    {dim:'信息意识',q:'备考期间，小陈收藏了大量学习方法视频却从未再看。从信息素养角度看，他的主要问题是？',opts:['收藏动作太快，不如全部摘抄','收藏不等于掌握，缺少消化使用','学习方法不合适，应换一批视频','视频平台内容不适合高中生'],ans:1,exp:'信息的价值在于被消化和使用；只囤积不整理、不应用，并不能转化为自己的知识。'},
+    {dim:'信息获取',q:'在搜索引擎中使用语法 site:edu.cn 的作用是？',opts:['将网页自动翻译成中文','把检索范围限定在教育机构网站','按网站名称精确搜索相关内容','提升搜索引擎的响应速度'],ans:1,exp:'site: 语法把检索范围限定在指定域名（如教育机构网站），常用于提高信源权威性。'},
+    {dim:'信息获取',q:'想获取「中国网民规模」这类权威统计数据，最可靠的来源是？',opts:['自媒体文章的转载截图','社交平台上的热门帖子','CNNIC等机构发布的统计报告','同学转发的聊天记录截图'],ans:2,exp:'统计数据应以官方一手来源为准，如CNNIC《中国互联网络发展状况统计报告》、国家统计局公报等。'},
+    {dim:'信息获取',q:'高三的小赵想查看某高校今年招生章程的权威原文，最可靠的途径是？',opts:['在教育部阳光高考平台或该校招生官网查询','在贴吧翻看学长学姐发布的经验帖','看短视频博主制作的院校情况解读','向培训机构老师索要一份宣传资料'],ans:0,exp:'招生章程属于政策文件，应以官方平台（阳光高考平台、院校招生网）发布的原文为准；经验帖和解读可作参考，但不能替代原文。'},
+    {dim:'信息获取',q:'想了解「人工智能课程」最近一年的最新进展，输入关键词搜索后，下面哪种做法最有帮助？',opts:['在搜索工具中把时间范围筛选为「一年内」','把同样的关键词多搜索几遍','在关键词后面加上「古代教育」','把结果页面全部截图保存'],ans:0,exp:'搜索引擎一般提供时间筛选功能，把范围限定在最近一年，能快速过滤过时内容；重复搜索不会改变结果。'},
+    {dim:'信息获取',q:'需要引用《中华人民共和国个人信息保护法》的现行条文，最权威的获取渠道是？',opts:['法律条文解读类公众号文章','科普视频博主的逐条讲解','百科网站的相关词条内容','国家法律法规数据库的官方文本'],ans:3,exp:'法律条文应以官方数据库的现行有效版本为准；解读文章可能滞后或有偏差，引用前需核对原文。'},
+    {dim:'信息获取',q:'想系统了解「算法推荐对青少年使用行为的影响」的研究现状，最合适的起点是？',opts:['短视频平台的相关热门视频','搜索引擎首页的第一条新闻','数据库中检索该主题的文献综述','直接问AI要一个结论来引用'],ans:2,exp:'文献综述汇总了某一主题的已有研究，是快速把握研究现状的最佳起点；短视频与AI回答无法替代。'},
+    {dim:'信息获取',q:'想查证一张网传照片的原始出处与拍摄时间，最直接的手段是？',opts:['询问转发者的个人感受','查看评论区网友的判断','凭照片画质判断拍摄年代','用反向搜图工具检索该图片'],ans:3,exp:'反向搜图可以追溯图片的最早发布时间与原始出处，是核查网传图片的基本工具。'},
+    {dim:'信息获取',q:'小孙在一个网络学习社区发帖求助学习中遇到的问题，下面哪种提问方式最可能得到有效的回答？',opts:['只发一句「急！在线等！」','把问题背景、目标和已尝试的方法说清楚','把同一个问题群发到很多群里','起一个夸张的标题吸引别人点击'],ans:1,exp:'把背景、目标和已做的尝试描述清楚，别人才能快速定位问题；清晰提问既是信息表达能力，也是网络求助的基本礼仪。'},
+    {dim:'信息评价',q:'事实核查中的「交叉验证」是指？',opts:['把同一条信息多读几遍','征求身边朋友们的看法','通过多个独立信源相互印证','只采用最先看到的那条'],ans:2,exp:'交叉验证要求多个相互独立的信源相互印证；单一来源无论多权威，都不宜作为唯一依据。'},
+    {dim:'信息评价',q:'评价一篇学术论文是否可靠，应重点关注？',opts:['字数与篇幅是否足够','同行评审、数据与方法是否透明','作者的粉丝数量与知名度','图表配色是否美观专业'],ans:1,exp:'同行评审、方法透明、数据可查是学术论文可靠性的核心机制；粉丝量与学术质量无关。'},
+    {dim:'信息评价',q:'就「某项健康研究的结论」而言，下列信源可信度从高到低排序最合理的是？',opts:['匿名网友＞新闻报道＞研究论文＞官方发布','新闻报道＞研究论文＞匿名网友＞官方发布','研究论文＞官方发布＞新闻报道＞匿名网友','官方发布＞匿名网友＞研究论文＞新闻报道'],ans:2,exp:'就研究结论而言：同行评审的研究文献＞官方发布＞媒体报道＞匿名自媒体；不同信源的证据等级不同。'},
+    {dim:'信息评价',q:'下列关于识别AI生成图片的说法，最准确的是？',opts:['只要画质模糊，就一定是AI生成的','画面足够逼真，就一定是真实拍摄','AI生成图片必定带有明显水印','手指、文字等细节异常是重要线索'],ans:3,exp:'AI生成图片常在手指、文字、光影等细节露馅；而画质模糊、有无水印都不能作为判断依据。'},
+    {dim:'信息评价',q:'某报道称「某校一本上线率暴涨300%」，评价前最应优先核查的是？',opts:['报道是否配有精美图表','统计基数与口径是否被夸大','转发与点赞数量的多少','标题是否使用了感叹号'],ans:1,exp:'「暴涨300%」可能源于基数极小或口径变换；看统计数据先问：基数是多少？口径是否一致？'},
+    {dim:'信息评价',q:'某手机横评视频结尾注明「由某厂商赞助」。对其排名结论，合理的态度是？',opts:['有厂商参与说明产品可靠，结论可信','八款机型齐全，数据必然全面客观','以播放量高低决定是否采信','注意赞助关系可能影响测评独立性'],ans:3,exp:'赞助关系构成潜在利益冲突；对照多个独立测评，才能校正单一来源的偏差。'},
+    {dim:'信息评价',q:'「某高考状元从小喝某品牌牛奶，可见该牛奶能提升成绩」，这一论证的主要漏洞是？',opts:['混淆了相关关系与因果关系','引用的数据来源不权威','样本量太小，不足以下结论','论证的语言不够生动'],ans:0,exp:'「同时出现」不等于「导致」；相关关系可能是巧合或混杂因素（如家庭环境）造成的，需谨慎推断。'},
+    {dim:'信息评价',q:'核查「某市地铁新线开通」的消息时，最关键的第一步是？',opts:['核对发布时间，排除旧闻重发','确认配图是否为地铁照片','统计该消息的转发数量','观察评论区的情绪倾向'],ans:0,exp:'旧闻新传是谣言常见套路；核对发布时间、对照官方渠道，是核查时效性信息的第一步。'},
+    {dim:'信息利用',q:'撰写文献综述时，正确的做法是？',opts:['将检索到的文献原文大段堆砌','只挑选支持自己观点的文献','归纳比较各研究并注明来源','按随机顺序罗列相关要点'],ans:2,exp:'文献综述重在「综」与「述」：归纳比较、指出共识与分歧，并规范注明来源。'},
+    {dim:'信息利用',q:'用思维导图整理检索到的信息，主要目的是？',opts:['让笔记版面更加美观','梳理知识结构与信息间的联系','占更多页面以显得用功','方便应付老师的日常检查'],ans:1,exp:'思维导图把零散信息结构化，呈现概念间关系，是典型的信息组织工具。'},
+    {dim:'信息利用',q:'制作统计图表展示调查结果时，下列哪种做法最容易误导读者？',opts:['截断纵轴，放大微小差异','为柱状图搭配醒目的颜色','在图表下方标注数据来源','将横轴按时间先后排序'],ans:0,exp:'纵轴不从零开始会夸大差异，是经典的视觉误导；规范作图反而是后三项的做法。'},
+    {dim:'信息利用',q:'你在某本书里看到一位学者观点的转述，想在报告中使用，规范的标注是？',opts:['直接标注原始文献，显得读过','不标注，改写后视为原创','文末统一写「部分参考网络」','标注「转引自」并注明实际来源'],ans:3,exp:'未核对原始文献时应标注「转引自+实际出处」；直接冒充读过原始文献属于引用造假。'},
+    {dim:'信息利用',q:'针对「中学生是否应该限制使用短视频」，你收集了支持与反对两方证据。报告中最有价值的结论呈现方式是？',opts:['归纳双方论据，提出有条件的观点','选择播放量更高的一方直接照搬','回避争议，只描述使用现状','将双方观点各摘抄一半拼凑'],ans:0,exp:'有价值的结论往往是有条件的（「在什么前提下成立」）；回避矛盾或各打五十大板都不是分析。'},
+    {dim:'信息利用',q:'用电子表格统计问卷时，发现某份作答全部选B且用时仅20秒。合理的处理是？',opts:['保留，反正样本已经够大','剔除该作答，并说明处理方式','只删除影响结论的那部分','按自己的判断替人补填'],ans:1,exp:'按统一标准剔除无效作答并如实说明，是最初步的数据清洗；随意增删数据则违背诚信。'},
+    {dim:'信息利用',q:'同一份调查结果，分别呈给指导老师和全班同学。下列理解最准确的是？',opts:['两份材料的内容要一字不差','可以根据汇报对象酌情编造','版本越多越要多加主观评论','调整形式与详略，但不改事实'],ans:3,exp:'根据受众调整呈现形式与详略是传播意识，但事实本身不容改动——这是「呈现」与「造假」的边界。'},
+    {dim:'信息利用',q:'想在公众号文章中使用他人摄影作品，符合规范的做法是？',opts:['截图后打上自己的水印','标注「侵删」即可放心使用','使用作者明确授权的作品并署名','把人脸模糊处理后随便使用'],ans:2,exp:'「侵删」不等于授权；应使用明确授权（如CC知识共享协议）的素材，并遵守其署名与使用条件。'},
+    {dim:'信息道德',q:'关于用生成式AI完成作业，正确的态度是？',opts:['随便用，反正老师查不出来','作为辅助工具，但不能冒充原创','AI属于新技术，应当全面禁止','偷偷使用，绝不主动说明'],ans:1,exp:'AI是辅助工具而非代笔；隐瞒使用、冒充原创违背学术诚信，使用规范以学校要求为准。'},
+    {dim:'信息道德',q:'发现同学原创的网站作品被人抄袭，可以建议他？',opts:['保留证据，向平台或学校投诉维权','忍气吞声，多一事不如少一事','到对方评论区公开对骂','也抄袭别人的作品找回平衡'],ans:0,exp:'理性维权路径：固定证据、平台投诉、学校或法律途径；以违法对违法只会让自己陷入被动。'},
+    {dim:'信息道德',q:'某热点事件中，部分网友根据模糊线索「人肉」出当事人并公开其住址电话。下列认识正确的是？',opts:['只要动机正义就不算违法','以正义为名同样侵犯隐私','参与人数多就不属于违法','只公开部分信息不算侵权'],ans:1,exp:'「人肉搜索」与公开他人个人信息侵犯隐私权，情节严重可能触犯法律；正义动机不豁免违法手段。'},
+    {dim:'信息道德',q:'某APP注册页默认勾选「同意将通讯录信息共享给第三方」。正确的认识是？',opts:['默认勾选就代表本人同意了','通讯录不属于个人信息','默认勾选不等于有效同意','不取消也没有任何风险'],ans:2,exp:'个人信息保护要求「知情同意」；默认勾选取得的同意效力存疑，收集敏感信息更需单独同意，可取消并可向网信部门投诉。'},
+    {dim:'信息道德',q:'接到「家人」的求助电话称急需转账，声音非常相似但拨的是陌生号码。最稳妥的做法是？',opts:['声音相似基本可信，立即转账','先转一小笔钱试试真伪','挂断后通过常用号码回拨核实','在电话里继续套问更多信息'],ans:2,exp:'AI可以克隆声音（深度伪造）；对涉及转账的请求，务必挂断后用常用号码回拨核实。'},
+    {dim:'信息道德',q:'关于「数字鸿沟」，下列理解最准确的是？',opts:['不同品牌手机之间的价格差异','仅仅指会不会上网的技能','指网络信号的强弱与快慢','数字接入、技能与机会的群体差距'],ans:3,exp:'数字鸿沟包括接入、技能与使用收益的多重差距，是信息社会公平的核心议题，也是图情领域关注的方向。'},
+    {dim:'信息道德',q:'下列情形中最可能构成对他人作品的「合理使用」的是？',opts:['为个人研究少量引用并注明出处','整篇文章转载并声明「仅作学习」','商业培训中大量复印教材发放','将他人漫画改编后制作周边出售'],ans:0,exp:'合理使用需满足：为个人学习研究等目的、适量引用、指明作者与出处；商业性大量使用一般不构成。'},
+    {dim:'信息道德',q:'群里有人转发某「大病筹款」链接请大家帮助。比较妥当的做法是？',opts:['不假思索，立即转发捐助','认定全是骗局，提醒大家别捐','随手转发，真假与自己无关','先核实项目与平台审核信息'],ans:3,exp:'既有真实求助也有虚假筹款；查看平台官方审核标识与项目证明，核实后再决定转发或捐助。'}
+  ]}
+};
+
+/* ========== 2. 流程控制 ========== */
+var level = null, idx = 0, answers = [], current = [], mode = 'full';
+var quizStart = 0, currentQStart = 0, answerTimes = [], lastRecord = null;
+
+function $(id){ return document.getElementById(id); }
+function show(name){
+  ['start','quiz','result'].forEach(function(s){
+    $('screen-' + s).classList.toggle('hidden', s !== name);
+  });
+  window.scrollTo(0, 0);
+}
+function setMode(m){
+  mode = m;
+  $('mode-full').classList.toggle('selected', m === 'full');
+  $('mode-quick').classList.toggle('selected', m === 'quick');
+}
+function shuffle(arr){
+  for (var i = arr.length - 1; i > 0; i--){
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = arr[i]; arr[i] = arr[j]; arr[j] = t;
+  }
+  return arr;
+}
+function pickQuick(all){
+  var picked = [];
+  DIMS.forEach(function(d){
+    var pool = all.filter(function(q){ return q.dim === d; });
+    shuffle(pool);
+    picked = picked.concat(pool.slice(0, 2));
+  });
+  return shuffle(picked);
+}
+function startQuiz(key){
+  var all = BANK[key].questions;
+  current = (mode === 'full') ? all.slice() : pickQuick(all);
+  level = key; idx = 0;
+  answers = new Array(current.length).fill(null);
+  answerTimes = [];
+  quizStart = Date.now();
+  show('quiz'); renderQ();
+}
+function renderQ(){
+  var q = current[idx];
+  currentQStart = Date.now();
+  $('q-progress').textContent = '第 ' + (idx + 1) + ' / ' + current.length + ' 题';
+  $('q-dim').textContent = q.dim;
+  $('q-bar').style.width = ((idx + 1) / current.length * 100) + '%';
+  $('q-text').textContent = q.q;
+  var box = $('q-options'); box.innerHTML = '';
+  q.opts.forEach(function(t, i){
+    var b = document.createElement('button');
+    b.className = 'opt';
+    b.innerHTML = '<span class="letter">' + 'ABCD'[i] + '</span><span>' + t + '</span>';
+    b.onclick = function(){ choose(i); };
+    box.appendChild(b);
+  });
+  $('btn-next').disabled = true;
+  $('btn-next').textContent = (idx === current.length - 1) ? '查看结果' : '下一题';
+}
+function choose(i){
+  answers[idx] = i;
+  var opts = document.querySelectorAll('#q-options .opt');
+  for (var j = 0; j < opts.length; j++){
+    opts[j].classList.toggle('selected', j === i);
+  }
+  $('btn-next').disabled = false;
+}
+function nextQ(){
+  answerTimes[idx] = Math.round((Date.now() - currentQStart) / 1000);
+  if (idx < current.length - 1){ idx++; renderQ(); } else { finish(); }
+}
+function retry(){ startQuiz(level); }
+function backHome(){ show('start'); refreshCount(); }
+
+/* ========== 3. 计分与报告 ========== */
+function finish(){
+  var dimStat = {};
+  DIMS.forEach(function(d){ dimStat[d] = {ok:0, total:0}; });
+  var correctCount = 0;
+  current.forEach(function(q, i){
+    dimStat[q.dim].total++;
+    if (answers[i] === q.ans){ dimStat[q.dim].ok++; correctCount++; }
+  });
+  var total = Math.round(correctCount / current.length * 100);
+  var pct = DIMS.map(function(d){
+    return Math.round(dimStat[d].ok / dimStat[d].total * 100);
+  });
+  var badge, color;
+  if (total >= 90){ badge = '优秀 🏆'; color = '#22c55e'; }
+  else if (total >= 75){ badge = '良好 🌟'; color = '#4f7cff'; }
+  else if (total >= 60){ badge = '合格 👍'; color = '#f59e0b'; }
+  else { badge = '待提升 💪'; color = '#ef4444'; }
+  $('r-total').textContent = total;
+  var b = $('r-badge'); b.textContent = badge; b.style.background = color;
+  $('r-level-name').textContent = BANK[level].name + (mode === 'full' ? ' · 完整测评' : ' · 快速测评');
+  $('r-dims').innerHTML = DIMS.map(function(d, i){
+    return '<div class="dim-row">'
+      + '<div class="name"><span>' + d + '</span><span>答对 ' + dimStat[d].ok + ' / ' + dimStat[d].total + ' 题</span></div>'
+      + '<div class="bar"><div class="bar-inner" style="width:' + pct[i] + '%"></div></div>'
+      + '</div>';
+  }).join('');
+  var weak = DIMS.filter(function(d, i){ return pct[i] < 60; });
+  $('r-tips').innerHTML = weak.length
+    ? weak.map(function(d){ return '<div class="tip">💡 <b>' + d + '</b>：' + TIPS[d] + '</div>'; }).join('')
+    : '<div class="tip">🎉 五个维度表现均衡，继续保持！可以挑战更高学段的题目。</div>';
+  var wrongs = [];
+  current.forEach(function(q, i){ if (answers[i] !== q.ans) wrongs.push({q:q, i:i}); });
+  $('r-review').innerHTML = wrongs.length
+    ? wrongs.map(function(o){
+        var q = o.q, my = answers[o.i];
+        var myTxt = (my === null) ? '未作答' : ('ABCD'[my] + '. ' + q.opts[my]);
+        return '<div class="review-item">'
+          + '<div class="q">' + (o.i + 1) + '. ' + q.q + '</div>'
+          + '<div class="wrong">✗ 你的答案：' + myTxt + '</div>'
+          + '<div class="right">✓ 正确答案：' + 'ABCD'[q.ans] + '. ' + q.opts[q.ans] + '</div>'
+          + '<div class="exp">解析：' + q.exp + '</div>'
+          + '</div>';
+      }).join('')
+    : '<div class="tip">✅ 全部答对，太棒了！</div>';
+
+  /* 生成并保存匿名记录 */
+  var rec = {
+    id: makeId(), ts: Date.now(), level: level, mode: mode,
+    totalScore: total, correct: correctCount, total: current.length,
+    durationSec: Math.round((Date.now() - quizStart) / 1000),
+    dims: {}, answers: []
+  };
+  DIMS.forEach(function(d){ rec.dims[d] = {ok: dimStat[d].ok, total: dimStat[d].total}; });
+  current.forEach(function(q, i){
+    rec.answers.push({
+      qid: qidOf(level, BANK[level].questions.indexOf(q)),
+      dim: q.dim, stem: q.q,
+      ans: answers[i], correctAns: q.ans,
+      score: (answers[i] === q.ans ? 1 : 0),
+      timeSec: answerTimes[i] || 0
+    });
+  });
+  saveRecord(rec);
+  lastRecord = rec;
+  $('r-recid').textContent = rec.id;
+  var dur = rec.durationSec;
+  $('r-duration').textContent = dur >= 60 ? Math.floor(dur/60) + '分' + (dur % 60) + '秒' : dur + '秒';
+
+  show('result');
+  drawRadar(pct);
+}
+
+/* ========== 4. 五维雷达图 ========== */
+function drawRadar(p){
+  var cv = $('radar'), ctx = cv.getContext('2d');
+  var size = 340, dpr = window.devicePixelRatio || 1;
+  cv.width = size * dpr; cv.height = size * dpr;
+  ctx.scale(dpr, dpr);
+  var cx = size / 2, cy = size / 2, R = size / 2 - 46, n = 5;
+  var i, a, r, x, y, k;
+  for (var ring = 1; ring <= 4; ring++){
+    ctx.beginPath();
+    for (i = 0; i <= n; i++){
+      a = -Math.PI / 2 + i * 2 * Math.PI / n;
+      r = R * ring / 4;
+      x = cx + r * Math.cos(a); y = cy + r * Math.sin(a);
+      if (i === 0){ ctx.moveTo(x, y); } else { ctx.lineTo(x, y); }
+    }
+    ctx.closePath(); ctx.strokeStyle = '#e5e7eb'; ctx.stroke();
+  }
+  ctx.font = '14px "PingFang SC","Microsoft YaHei",sans-serif';
+  for (i = 0; i < n; i++){
+    a = -Math.PI / 2 + i * 2 * Math.PI / n;
+    ctx.beginPath(); ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + R * Math.cos(a), cy + R * Math.sin(a));
+    ctx.strokeStyle = '#e5e7eb'; ctx.stroke();
+    ctx.fillStyle = '#374151'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(DIMS[i], cx + (R + 26) * Math.cos(a), cy + (R + 26) * Math.sin(a));
+  }
+  ctx.beginPath();
+  for (i = 0; i <= n; i++){
+    k = i % n;
+    a = -Math.PI / 2 + k * 2 * Math.PI / n;
+    r = R * p[k] / 100;
+    x = cx + r * Math.cos(a); y = cy + r * Math.sin(a);
+    if (i === 0){ ctx.moveTo(x, y); } else { ctx.lineTo(x, y); }
+  }
+  ctx.closePath(); ctx.fillStyle = 'rgba(79,124,255,.25)'; ctx.fill();
+  ctx.strokeStyle = '#4f7cff'; ctx.lineWidth = 2; ctx.stroke();
+  ctx.fillStyle = '#4f7cff';
+  for (i = 0; i < n; i++){
+    a = -Math.PI / 2 + i * 2 * Math.PI / n;
+    r = R * p[i] / 100;
+    ctx.beginPath(); ctx.arc(cx + r * Math.cos(a), cy + r * Math.sin(a), 4, 0, 2 * Math.PI); ctx.fill();
+  }
+}
+
+/* ========== 5. 数据记录与导出（教师用） ========== */
+var RECORDS_KEY = 'ils_quiz_records_v1';
+
+function loadRecords(){
+  try { return JSON.parse(localStorage.getItem(RECORDS_KEY) || '[]'); }
+  catch(e){ return []; }
+}
+function saveRecord(rec){
+  var all = loadRecords();
+  all.push(rec);
+  try { localStorage.setItem(RECORDS_KEY, JSON.stringify(all)); }
+  catch(e){ alert('本机存储保存失败（可能开启了无痕模式或空间不足）。请使用结果页的「导出本次数据」按钮保存。'); }
+  refreshCount();
+}
+function makeId(){
+  var t = Date.now().toString(36).toUpperCase();
+  var r = Math.floor(Math.random() * 46656).toString(36).toUpperCase();
+  return 'R-' + t + '-' + ('00' + r).slice(-3);
+}
+function two(n){ return (n < 10 ? '0' : '') + n; }
+function fmtTime(ts){
+  var d = new Date(ts);
+  return d.getFullYear() + '-' + two(d.getMonth()+1) + '-' + two(d.getDate()) + ' '
+       + two(d.getHours()) + ':' + two(d.getMinutes()) + ':' + two(d.getSeconds());
+}
+function stamp(){
+  var d = new Date();
+  return '' + d.getFullYear() + two(d.getMonth()+1) + two(d.getDate()) + '_' + two(d.getHours()) + two(d.getMinutes());
+}
+function qidOf(level, bankIndex){ return level + '-' + two(bankIndex + 1); }
+function csvCell(v){
+  v = String(v);
+  if (/[",\n]/.test(v)){ v = '"' + v.replace(/"/g, '""') + '"'; }
+  return v;
+}
+function downloadCSV(filename, rows){
+  var content = '\ufeff' + rows.map(function(r){ return r.map(csvCell).join(','); }).join('\r\n');
+  var blob = new Blob([content], {type: 'text/csv;charset=utf-8'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
+}
+function buildDetailCSV(recs){
+  var rows = [['记录编号','提交时间','学段','模式','总分','答对题数','总题数','本卷题号','题目ID','维度','题干','学生作答','正确答案','是否得分','答题用时秒']];
+  recs.forEach(function(r){
+    r.answers.forEach(function(a, i){
+      rows.push([r.id, fmtTime(r.ts), BANK[r.level].name,
+        r.mode === 'full' ? '完整测评' : '快速测评',
+        r.totalScore, r.correct, r.total,
+        i + 1, a.qid, a.dim, a.stem,
+        'ABCD'[a.ans], 'ABCD'[a.correctAns], a.score, a.timeSec]);
+    });
+  });
+  return rows;
+}
+function buildScoreCSV(recs){
+  var names = {xiaoxue:'小学', chuzhong:'初中', gaozhong:'高中'};
+  var cols = [];
+  ['xiaoxue','chuzhong','gaozhong'].forEach(function(lv){
+    BANK[lv].questions.forEach(function(q, i){ cols.push(qidOf(lv, i)); });
+  });
+  var head = ['记录编号','提交时间','学段','模式','总用时秒','总题数','答对题数','总分',
+              '信息意识','信息获取','信息评价','信息利用','信息道德'];
+  cols.forEach(function(c){ head.push(c + '得分'); });
+  var rows = [head];
+  recs.forEach(function(r){
+    var map = {};
+    r.answers.forEach(function(a){ map[a.qid] = a.score; });
+    var row = [r.id, fmtTime(r.ts), BANK[r.level].name,
+      r.mode === 'full' ? '完整测评' : '快速测评',
+      r.durationSec, r.total, r.correct, r.totalScore,
+      r.dims['信息意识'].ok, r.dims['信息获取'].ok, r.dims['信息评价'].ok, r.dims['信息利用'].ok, r.dims['信息道德'].ok];
+    cols.forEach(function(c){ row.push(map[c] === undefined ? '' : map[c]); });
+    rows.push(row);
+  });
+  return rows;
+}
+function buildBankCSV(){
+  var rows = [['题目ID','学段','维度','题干','选项A','选项B','选项C','选项D','正确答案']];
+  ['xiaoxue','chuzhong','gaozhong'].forEach(function(lv){
+    BANK[lv].questions.forEach(function(q, i){
+      rows.push([qidOf(lv, i), BANK[lv].name, q.dim, q.q,
+        q.opts[0], q.opts[1], q.opts[2], q.opts[3], 'ABCD'[q.ans]]);
+    });
+  });
+  return rows;
+}
+function refreshCount(){
+  $('rec-count').textContent = loadRecords().length;
+}
+function requireRecords(){
+  var recs = loadRecords();
+  if (!recs.length){ alert('本机还没有保存任何测评记录。'); return null; }
+  return recs;
+}
+function exportAllScore(){
+  var recs = requireRecords();
+  if (recs){ downloadCSV('信息素养测评_成绩汇总_' + stamp() + '.csv', buildScoreCSV(recs)); }
+}
+function exportAllDetail(){
+  var recs = requireRecords();
+  if (recs){ downloadCSV('信息素养测评_作答明细_' + stamp() + '.csv', buildDetailCSV(recs)); }
+}
+function exportBank(){
+  downloadCSV('信息素养测评_题库对照表_' + stamp() + '.csv', buildBankCSV());
+}
+function exportLast(){
+  if (!lastRecord){ alert('本次还没有测评记录。'); return; }
+  downloadCSV('信息素养测评_' + lastRecord.id + '.csv', buildDetailCSV([lastRecord]));
+}
+function clearRecords(){
+  if (!requireRecords()) return;
+  if (confirm('确定清空本机保存的全部测评记录吗？清空后无法恢复，请确认已导出备份。')){
+    localStorage.removeItem(RECORDS_KEY);
+    refreshCount();
+  }
+}
+refreshCount();
+</script>
+</body>
+</html>
